@@ -93,7 +93,7 @@ function updateGame() {
   const eggs = document.querySelectorAll(".egg");
   eggs.forEach((egg) => {
     const top = parseInt(egg.style.top || "0");
-    egg.style.top = `${top + 10}px`; // Adjust falling speed here
+    egg.style.top = `${top + 35}px`; // Adjust falling speed here
 
     // Check for collision with basket
     const eggRect = egg.getBoundingClientRect();
