@@ -139,3 +139,67 @@ function startGame() {
 }
 
 startGame();
+
+///////////////////////////////////
+
+async function submitScore(score) {
+  const playerName = localStorage.getItem("playerName") || "Anonymous";
+  try {
+    await addDoc(collection(db, "leaderboard"), {
+      name: playerName,
+      score: score,
+    });
+  } catch (error) {
+    console.error("Error adding document: ", error);
+  }
+}
+
+// When player loses
+async function addToLeaderboard(playerName, score) {
+  try {
+    await addDoc(collection(db, "leaderboard"), {
+      name: playerName,
+      score: score,
+      timestamp: serverTimestamp(),
+    });
+  } catch (e) {
+    console.error("Error adding to leaderboard: ", e);
+  }
+}
+
+// Real-time leaderboard updates
+function setupLeaderboardListener(updateUI) {
+  const q = query(
+    collection(db, "leaderboard"),
+    orderBy("score", "desc"),
+    limit(10) // Top 10 scores
+  );
+
+  return onSnapshot(q, (querySnapshot) => {
+    const scores = [];
+    querySnapshot.forEach((doc) => {
+      scores.push({ id: doc.id, ...doc.data() });
+    });
+    updateUI(scores); // Call your UI update function
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const finalScore = localStorage.getItem("finalScore");
+  const playerName = localStorage.getItem("playerName");
+
+  async function addScoreToLeaderboard() {
+    if (finalScore && playerName) {
+      try {
+        await addDoc(collection(db, "leaderboard"), {
+          name: playerName,
+          score: parseInt(finalScore),
+        });
+      } catch (error) {
+        console.error("Error adding document: ", error);
+      }
+    }
+  }
+
+  addScoreToLeaderboard();
+});

@@ -18,11 +18,83 @@
       <div class="leaderboard-section">
         <div class="leaderboard-title">Leaderboard</div>
         <!-- Leaderboard entries would go here -->
+        <div id="leaderboard">
+          <!-- <h2 class="topScores">Top Scores</h2> -->
+          <ol id="scores-list"></ol>
+        </div>
       </div>
-      <div class="menu-button" onClick="goToMainMenu()">
+      <div class="menu-button" onclick="goToMainMenu()">
         <div class="menu-text">Main Menu</div>
       </div>
     </div>
-    <script src="/script.js"></script>
+    <!-- <script src="/script.js"></script> -->
   </body>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      limit,
+      onSnapshot,
+    } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDI8wiXCt99E5T4S3CVDW7d8Mdg7Zpz5A8",
+      authDomain: "catchtheeggleaderboard.firebaseapp.com",
+      projectId: "catchtheeggleaderboard",
+      storageBucket: "catchtheeggleaderboard.firebasestorage.app",
+      messagingSenderId: "800278076059",
+      appId: "1:800278076059:web:92c98bdae1f0fbe94a043e",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function updateLeaderboardUI(scores) {
+      const list = document.getElementById("scores-list");
+      if (!list) return;
+      list.innerHTML = scores
+        .map((score) => `<li>${score.name}: ${score.score}</li>`)
+        .join("");
+    }
+
+    function setupLeaderboardListener(updateUI) {
+      const q = query(
+        collection(db, "leaderboard"),
+        orderBy("score", "desc"),
+        limit(5)
+      );
+
+      return onSnapshot(q, (querySnapshot) => {
+        const scores = [];
+        querySnapshot.forEach((doc) => {
+          scores.push({ id: doc.id, ...doc.data() });
+        });
+        updateUI(scores);
+      });
+    }
+
+    // Start listening for leaderboard updates
+    setupLeaderboardListener(updateLeaderboardUI);
+
+    window.goToMainMenu = function () {
+      window.location.href = "index.html";
+    };
+  </script>
+  <!-- <script>
+    function updateLeaderboardUI(scores) {
+      const list = document.getElementById("scores-list");
+      list.innerHTML = scores
+        .map((score) => `<li>${score.name}: ${score.score}</li>`)
+        .join("");
+    }
+
+    // Initialize listener
+    setupLeaderboardListener(updateLeaderboardUI);
+  </script> -->
 </html>
